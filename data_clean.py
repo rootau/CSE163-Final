@@ -19,16 +19,28 @@ approval = pd.read_csv(approval_path, encoding="latin1", header=None,
 
 senate["Range"] = senate["Congress"].shift(-1)
 senate = senate.dropna()
+dates = senate["Range"].str.strip("()").str.split(" to ", expand=True)
+senate["Start Date"] = pd.to_datetime(dates[0], format="%m/%d/%Y")
+senate["End Date"] = pd.to_datetime(dates[1], format="%m/%d/%Y")
 senate.to_csv(script_dir / "Cleaned_Senate.csv", index=False)
 
 house[["Number", "Year Range"]] = house["Congress (Years)"].str.extract(
     r"(.+?)\s*\((.*?)\)"
 )
+dates = house["Year Range"].str.split("-", expand=True)
+house["Start Date"] = pd.to_numeric(dates[0], errors="coerce")
+house["End Date"] = pd.to_numeric(dates[1], errors="coerce")
+senate["Start Years"] = senate["Start Date"].dt.year
+senate["End Years"] = senate["End Date"].dt.year
+year_to_date = senate.set_index("Start Years")["Start Date"]
+house["Start Date"] = house["Start Date"].map(year_to_date)
+years_to_date = senate.set_index("End Years")["End Date"]
+house["End Date"] = house["End Date"].map(years_to_date)
 house.to_csv(script_dir / "Cleaned_House.csv", index=False)
 
 # Desired column names and order
 columns = [
-    "President", "Start date", "End Date",
+    "President", "Start Date", "End Date",
     "Approving", "Disapproving", "Unsure/NoData",
     "Democrats Approving", "Independents Approving",
     "Republicans Approving"
@@ -41,7 +53,7 @@ def normalize_header(value):
     if value == "president":
         return "President"
     if value.startswith("start date"):
-        return "Start date"
+        return "Start Date"
     if value.startswith("end date"):
         return "End Date"
     if value.startswith("approving"):
@@ -66,7 +78,7 @@ current_columns = {}
 for _, row in approval.iterrows():
 
     # Detect a repeated header row
-    if normalize_header(row.iloc[1]) == "Start date":
+    if normalize_header(row.iloc[1]) == "Start Date":
 
         # Reset the column mapping for this section
         current_columns = {0: "President"}
@@ -90,10 +102,23 @@ for _, row in approval.iterrows():
         if row.iloc[i] != "":
             new_row[column] = row.iloc[i]
 
-    if new_row.get("President") and new_row.get("Start date"):
+    if new_row.get("President") and new_row.get("Start Date"):
         result.append(new_row)
 
+
 approval = pd.DataFrame(result, columns=columns)
+approval["Start Date"] = pd.to_datetime(approval["Start Date"], format="%m/%d/%y")
+approval["End Date"] = pd.to_datetime(approval["End Date"], format="%m/%d/%y")
+
+approval["Start Date"] = approval["Start Date"].where(
+    approval["Start Date"].dt.year <= 2026,
+    approval["Start Date"] - pd.DateOffset(years=100)
+)
+
+approval["End Date"] = approval["End Date"].where(
+    approval["End Date"].dt.year <= 2026,
+    approval["End Date"] - pd.DateOffset(years=100)
+)
 
 insert_position = approval.index[
     approval["President"] == "Trump (1st)"
@@ -103,7 +128,7 @@ trump1 = approval[approval["President"] == "Trump (1st)"].copy()
 
 # Combine rows with matching date ranges
 trump1 = (
-    trump1.groupby(["President", "Start date", "End Date"], as_index=False)
+    trump1.groupby(["President", "Start Date", "End Date"], as_index=False)
     .first()
 )
 
@@ -136,3 +161,4 @@ has_party = approval[party_cols].notna().any(axis=1)
 # Keep rows where both types of data are available
 approval = approval[has_approval & has_party].copy()
 approval.to_csv(script_dir / "Cleaned_Approval_Rating.csv", index=False)
+
