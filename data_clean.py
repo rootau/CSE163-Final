@@ -1,7 +1,6 @@
 import pandas as pd
-
 import re
-
+import numpy as np
 from pathlib import Path
 
 # Points directly to the folder where THIS .py script is saved
@@ -12,7 +11,7 @@ orders_path = script_dir / "Executive_Orders.csv"
 approval_path = script_dir / "Approval_Rating.csv"
 
 senate = pd.read_csv(senate_path, encoding="latin1")
-house = pd.read_csv(house_path, encoding="latin1")
+house = pd.read_csv(house_path, encoding="latin1", skiprows=158)
 orders = pd.read_csv(orders_path, encoding="latin1")
 approval = pd.read_csv(approval_path, encoding="latin1", header=None,
                        dtype=str, keep_default_na=False)
@@ -22,12 +21,30 @@ senate = senate.dropna()
 dates = senate["Range"].str.strip("()").str.split(" to ", expand=True)
 senate["Start Date"] = pd.to_datetime(dates[0], format="%m/%d/%Y")
 senate["End Date"] = pd.to_datetime(dates[1], format="%m/%d/%Y")
+majority = senate["Majority"].str.split(" ", n=1, expand=True)
+minority = senate["Minority"].str.split(" ", n=1, expand=True)
+senate["Party"] = majority[1]
+senate["Democrats"] = (
+    majority[0].where(majority[1] == "Democrats",
+                            minority[0])
+)
+
+senate["Republicans"] = (
+    majority[0].where(majority[1] == "Republicans",
+                            minority[0])
+)
+
+# Convert to numeric
+senate[["Democrats", "Republicans"]] = (
+    senate[["Democrats", "Republicans"]].apply(pd.to_numeric)
+)
 senate.to_csv(script_dir / "Cleaned_Senate.csv", index=False)
+
 
 house[["Number", "Year Range"]] = house["Congress (Years)"].str.extract(
     r"(.+?)\s*\((.*?)\)"
 )
-dates = house["Year Range"].str.split("-", expand=True)
+dates = house["Year Range"].str.split(r"[-Ð]", expand=True)
 house["Start Date"] = pd.to_numeric(dates[0], errors="coerce")
 house["End Date"] = pd.to_numeric(dates[1], errors="coerce")
 senate["Start Years"] = senate["Start Date"].dt.year
@@ -36,6 +53,14 @@ year_to_date = senate.set_index("Start Years")["Start Date"]
 house["Start Date"] = house["Start Date"].map(year_to_date)
 years_to_date = senate.set_index("End Years")["End Date"]
 house["End Date"] = house["End Date"].map(years_to_date)
+house["Democrats"] = pd.to_numeric(house["Democrats"], errors="coerce")
+house["Republicans"] = pd.to_numeric(house["Republicans"], errors="coerce")
+house["Majority"] = np.where(
+    house["Democrats"] > house["Republicans"],
+    "Democrats",
+    "Republicans"
+)
+house = house.dropna()
 house.to_csv(script_dir / "Cleaned_House.csv", index=False)
 
 # Desired column names and order
@@ -163,4 +188,8 @@ approval = approval[has_approval & has_party].copy()
 approval.to_csv(script_dir / "Cleaned_Approval_Rating.csv", index=False)
 
 orders["signing_date"] = pd.to_datetime(orders["signing_date"], format="%m/%d/%y", errors="coerce")
+orders["signing_date"] = orders["signing_date"].where(
+    orders["signing_date"].dt.year <= 2026,
+    orders["signing_date"] - pd.DateOffset(years=100)
+)
 orders.to_csv(script_dir / "Cleaned_Executive_Orders.csv", index=False)
