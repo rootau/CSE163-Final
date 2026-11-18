@@ -6,9 +6,7 @@ from pathlib import Path
 
 def make_congress(senate: pd.DataFrame, house: pd.DataFrame) -> pd.DataFrame:
     """
-    Combine the Senate and House dataframes into a single dataframe
-    with columns: 'Congress', 'Start Date', 'End Date', 'Senate Seats',
-    'House Seats'.
+    Combines the Senate and House dataframes into a single dataframe
     """
     # Merge the two dataframes on the 'Start Date' and 'End Date' columns
     congress = pd.merge(
@@ -27,8 +25,7 @@ def make_congress(senate: pd.DataFrame, house: pd.DataFrame) -> pd.DataFrame:
 
 def make_ordersvscongress(orders: pd.DataFrame, congress: pd.DataFrame) -> pd.DataFrame:
     """
-    Combine the Executive Orders dataframe with the Congress dataframe
-    to analyze the relationship between executive orders and congressional composition.
+    Combines the Executive Orders dataframe with the Congress dataframe
     """
     counts = []
 
@@ -40,10 +37,78 @@ def make_ordersvscongress(orders: pd.DataFrame, congress: pd.DataFrame) -> pd.Da
 
         counts.append(count)
 
-    orders_vs_congress = congress[["Start Date", "End Date"]].copy()
+    orders_vs_congress = congress.copy()
     orders_vs_congress["Orders"] = counts
     return orders_vs_congress
 
+def make_ordersvsapprovalavg(orders: pd.DataFrame, approval: pd.DataFrame) -> pd.DataFrame:
+    """
+    Combine the Executive Orders dataframe with the Approval Ratings dataframe
+    by how many orders were signed during each president's term and the average approval ratings.
+    """
+
+    counts = []
+    president_approval = approval.groupby("President").agg(
+        **{
+            "Start Date": ("Start Date", "min"),
+            "End Date": ("End Date", "max"),
+            "Average Approval": ("Approving", "mean"),
+            "Average Disapproval": ("Disapproving", "mean"),
+            "Average Unsure": ("Unsure/NoData", "mean"),
+            "Democrats Approving": ("Democrats Approving", "mean"),
+            "Independents Approving": ("Independents Approving", "mean"),
+            "Republicans Approving": ("Republicans Approving", "mean")
+        }
+    ).sort_values(by="Start Date", ascending=False).reset_index()
+    for _, row in president_approval.iterrows():
+        count = (
+            (orders["signing_date"] >= row["Start Date"]) &
+            (orders["signing_date"] <= row["End Date"])
+        ).sum()
+
+        counts.append(count)
+
+    orders_vs_approval = president_approval.copy()
+    orders_vs_approval["Orders"] = counts
+    return orders_vs_approval
+
+def make_ordersvsapprovalmonthly(orders: pd.DataFrame, approval: pd.DataFrame) -> pd.DataFrame:
+    """
+    Combine the Executive Orders dataframe with the Approval Ratings dataframe
+    by the average ratings per month and how many orders were signed
+    """
+    monthly = approval.copy()
+    monthly["Year-Month"] = monthly["Start Date"].dt.to_period("M")
+    monthly = monthly.groupby("Year-Month").agg(
+        **{
+            "Start Date": ("Start Date", "min"),
+            "End Date": ("End Date", "max"),
+            "Average Approval": ("Approving", "mean"),
+            "Average Disapproval": ("Disapproving", "mean"),
+            "Average Unsure": ("Unsure/NoData", "mean"),
+            "Democrats Approving": ("Democrats Approving", "mean"),
+            "Independents Approving": ("Independents Approving", "mean"),
+            "Republicans Approving": ("Republicans Approving", "mean")
+        }
+    ).sort_values(by="Start Date", ascending=False).reset_index()
+    monthly["Start Date"] = monthly["Year-Month"].dt.to_timestamp()
+
+    monthly["End Date"] = (
+        monthly["Year-Month"].dt.to_timestamp(how="end").dt.normalize()
+    )
+    counts = []
+
+    for _, row in monthly.iterrows():
+        count = (
+            (orders["signing_date"] >= row["Start Date"]) &
+            (orders["signing_date"] <= row["End Date"])
+        ).sum()
+
+        counts.append(count)
+
+    orders_vs_approval = monthly.copy()
+    orders_vs_approval["Orders"] = counts
+    return orders_vs_approval
 
 def main():
     # Points directly to the folder where THIS .py script is saved
@@ -60,6 +125,14 @@ def main():
     congress = make_congress(senate, house)
 
     orders_vs_congress = make_ordersvscongress(orders, congress)
+
+    president_orders_vs_approval = make_ordersvsapprovalavg(orders, approval)
+
+    monthly_orders_vs_approval = make_ordersvsapprovalmonthly(orders, approval)
+
+    
+
+    
 
 if __name__ == "__main__":
     main()
