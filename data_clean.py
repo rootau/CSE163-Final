@@ -1,5 +1,7 @@
 import pandas as pd
 
+import re
+
 from pathlib import Path
 
 # Points directly to the folder where THIS .py script is saved
@@ -12,10 +14,125 @@ approval_path = script_dir / "Approval_Rating.csv"
 senate = pd.read_csv(senate_path, encoding="latin1")
 house = pd.read_csv(house_path, encoding="latin1")
 orders = pd.read_csv(orders_path, encoding="latin1")
-approval = pd.read_csv(approval_path, encoding="latin1")
+approval = pd.read_csv(approval_path, encoding="latin1", header=None,
+                       dtype=str, keep_default_na=False)
 
 senate["Range"] = senate["Congress"].shift(-1)
 senate = senate.dropna()
 senate.to_csv(script_dir / "Cleaned_Senate.csv", index=False)
 
-print(approval.head(1))
+house[["Number", "Year Range"]] = house["Congress (Years)"].str.extract(
+    r"(.+?)\s*\((.*?)\)"
+)
+house.to_csv(script_dir / "Cleaned_House.csv", index=False)
+
+# Desired column names and order
+columns = [
+    "President", "Start date", "End Date",
+    "Approving", "Disapproving", "Unsure/NoData",
+    "Democrats Approving", "Independents Approving",
+    "Republicans Approving"
+]
+
+def normalize_header(value):
+    value = str(value).strip().lower().replace("�", "")
+    value = re.sub(r"\s+", " ", value)
+
+    if value == "president":
+        return "President"
+    if value.startswith("start date"):
+        return "Start date"
+    if value.startswith("end date"):
+        return "End Date"
+    if value.startswith("approving"):
+        return "Approving"
+    if value.startswith("disapproving"):
+        return "Disapproving"
+    if value.startswith("unsure"):
+        return "Unsure/NoData"
+    if "democrat" in value:
+        return "Democrats Approving"
+    if "independent" in value:
+        return "Independents Approving"
+    if "republican" in value:
+        return "Republicans Approving"
+
+    return None
+
+
+result = []
+current_columns = {}
+
+for _, row in approval.iterrows():
+
+    # Detect a repeated header row
+    if normalize_header(row.iloc[1]) == "Start date":
+
+        # Reset the column mapping for this section
+        current_columns = {0: "President"}
+
+        for i, value in enumerate(row):
+            name = normalize_header(value)
+
+            if name is not None:
+                current_columns[i] = name
+
+        continue
+
+    # Skip completely empty rows
+    if row.eq("").all():
+        continue
+
+    new_row = {}
+
+    # Assign values according to the current header
+    for i, column in current_columns.items():
+        if row.iloc[i] != "":
+            new_row[column] = row.iloc[i]
+
+    if new_row.get("President") and new_row.get("Start date"):
+        result.append(new_row)
+
+approval = pd.DataFrame(result, columns=columns)
+
+insert_position = approval.index[
+    approval["President"] == "Trump (1st)"
+].min()
+
+trump1 = approval[approval["President"] == "Trump (1st)"].copy()
+
+# Combine rows with matching date ranges
+trump1 = (
+    trump1.groupby(["President", "Start date", "End Date"], as_index=False)
+    .first()
+)
+
+# Remove the original Trump (1st) rows
+approval = approval[approval["President"] != "Trump (1st)"]
+
+before = approval[approval.index < insert_position]
+after = approval[approval.index > insert_position]
+
+# Insert the combined rows between the two parts
+approval = pd.concat(
+    [before, trump1, after],
+    ignore_index=True
+)
+
+approval_cols = ["Approving", "Disapproving", "Unsure/NoData"]
+
+party_cols = [
+    "Democrats Approving",
+    "Independents Approving",
+    "Republicans Approving"
+]
+
+# Check whether each row has any overall approval data
+has_approval = approval[approval_cols].notna().any(axis=1)
+
+# Check whether each row has any party approval data
+has_party = approval[party_cols].notna().any(axis=1)
+
+# Keep rows where both types of data are available
+approval = approval[has_approval & has_party].copy()
+approval.to_csv(script_dir / "Cleaned_Approval_Rating.csv", index=False)
