@@ -13,3 +13,9 @@ senate = pd.read_csv(senate_path, encoding="latin1")
 house = pd.read_csv(house_path, encoding="latin1")
 orders = pd.read_csv(orders_path, encoding="latin1")
 approval = pd.read_csv(approval_path, encoding="latin1")
+
+senate["Range"] = senate["Congress"].shift(-1)
+senate = senate.dropna()
+senate.to_csv(script_dir / "Cleaned_Senate.csv", index=False)
+
+print(approval.head(1))
