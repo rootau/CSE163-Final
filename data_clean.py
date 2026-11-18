@@ -128,7 +128,7 @@ trump1 = approval[approval["President"] == "Trump (1st)"].copy()
 
 # Combine rows with matching date ranges
 trump1 = (
-    trump1.groupby(["President", "Start Date", "End Date"], as_index=False)
+    trump1.groupby(["President", "End Date"], as_index=False)
     .first()
 )
 
@@ -162,3 +162,5 @@ has_party = approval[party_cols].notna().any(axis=1)
 approval = approval[has_approval & has_party].copy()
 approval.to_csv(script_dir / "Cleaned_Approval_Rating.csv", index=False)
 
+orders["signing_date"] = pd.to_datetime(orders["signing_date"], format="%m/%d/%y", errors="coerce")
+orders.to_csv(script_dir / "Cleaned_Executive_Orders.csv", index=False)
