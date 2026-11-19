@@ -25,7 +25,7 @@ def get_month(pd: pd.dataframe, time: str, count: str) -> pd.Series:
     Gets the number of values in a month
     """
     months = pd.copy()
-    months["Month"] = pd[col].dt.to_period("M")
+    months["Month"] = pd[time].dt.to_period("M")
     return months.groupby("Month")[count].count()
 
 def main():
