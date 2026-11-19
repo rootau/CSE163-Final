@@ -46,6 +46,7 @@ def main():
 
     # Executive Order summary
     
+    
     # Approval Rating Summaries
     print(get_unique_values(approval_path, "President"))
     print(get_sum_quan(approval_path, "Approving"))
@@ -62,5 +63,9 @@ def main():
     
 
     # Senate Summaries
+    print(get_sum_quan(senate_path, "Democrats"))
+    print(get_sum_quan(senate_path, "Republicans"))
+    print(get_sum_quan(senate_path, "Other"))
+    print(get_sum_quan(senate_path, "Vacant"))
 if __name__ == "__main__":
     main()
