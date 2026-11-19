@@ -20,12 +20,21 @@ def get_unique_values(pd: pd.DataFrame, col: str) -> pd.Series:
 
     return pd[col].value_counts(ascending=False)
 
-def get_month(pd: pd.DataFrame, time: str) -> pd.Series:
+def get_monthyear(pd: pd.DataFrame, time: str) -> pd.Series:
     """
-    Gets the number of values in a month
+    Gets the number of values in a month of year
     """
     months = pd.copy()
     months["Month"] = pd[time].dt.to_period("M")
+    return months.groupby("Month").size().reset_index(
+        name="Count").sort_values(by="Month", ascending=False)
+
+def get_calendar_months(pd: pd.DataFrame, time: str) -> pd.Series:
+    """
+    Gets the number of values in a month aggregated through all years
+    """
+    months = pd.copy()
+    months["Month"] = pd[time].dt.month_name()
     return months.groupby("Month").size().reset_index(
         name="Count").sort_values(by="Month", ascending=False)
 
@@ -57,7 +66,8 @@ def main():
     # Gets all summaries of columns with quantitive data. 
 
     # Executive Order summary
-    print(get_month(orders, "signing_date"))
+    print(get_monthyear(orders, "signing_date"))
+    print(get_calendar_months(orders, "signing_date"))
     
     # Approval Rating Summaries
     print(get_unique_values(approval, "President"))
