@@ -186,10 +186,14 @@ def main():
     orders = pd.read_csv(orders_path, parse_dates=["signing_date"])
 
     congress = make_congress(senate, house)
+    #print(congress.head())
 
     orders_vs_congress = make_ordersvscongress(orders, congress)
+    #print(orders_vs_congress.head())
     president_orders_vs_approval = make_ordersvsapprovalavg(orders, approval)
+    #print(president_orders_vs_approval.head())
     monthly_orders_vs_approval = make_ordersvsapprovalmonthly(orders, approval)
+    #print(monthly_orders_vs_approval.head())
 
     orders_congress_graph = make_orderscongressgraph(orders_vs_congress)
     orders_congress_graph.savefig(script_dir / "orders_congress_graph.png")
