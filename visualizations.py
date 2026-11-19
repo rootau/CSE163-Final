@@ -159,7 +159,7 @@ def make_orderspresapprovalgraph(orders_vs_approval:
     ("Executive Orders Signed by President, hued by Average Approval")
     ax[1].set_title
     ("Executive Orders Signed by President, " +
-    "with Average Approval as a scatter plot")
+     "with Average Approval as a scatter plot")
     ax[0].tick_params(axis="x", labelrotation=90)
     ax[1].tick_params(axis="x", labelrotation=90)
     fig.subplots_adjust(hspace=1)
