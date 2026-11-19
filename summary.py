@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 
-def get_sum_quan(pd: pd.dataframe, col: String):
+def get_sum_quan(pd: pd.dataframe, col: Str):
     # Gets the summary of any quantitative values.
 
     return pd[col].describe()
@@ -12,7 +12,7 @@ def get_sum_quan(pd: pd.dataframe, col: String):
 
 def get_unique_values(pd: pd.dataframe, col: String):
 
-    return pd[col].value_counts(ascending=True)
+    return pd[col].value_counts(ascending=False)
 
 
 def main():
@@ -34,11 +34,13 @@ def main():
     # Executive Order summary
     
     # Approval Rating Summaries
+    print(get_unique_values(approval_path, "President"))
+    print(get_sum_quan(approval_path, "Approving"))
 
     # House Summaries 
-    print(get_sum_quan(house_path, "Democrats"))
-    print(get_sum_quan(house_path, "Republicans"))
-    print(get_unique_values(house_path ,"Majority"))
+    # print(get_sum_quan(house_path, "Democrats"))
+    # print(get_sum_quan(house_path, "Republicans"))
+    # print(get_unique_values(house_path ,"Majority"))
     
 
     # Senate Summaries
