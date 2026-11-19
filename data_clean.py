@@ -26,12 +26,12 @@ minority = senate["Minority"].str.split(" ", n=1, expand=True)
 senate["Party"] = majority[1]
 senate["Democrats"] = (
     majority[0].where(majority[1] == "Democrats",
-                            minority[0])
+                      minority[0])
 )
 
 senate["Republicans"] = (
     majority[0].where(majority[1] == "Republicans",
-                            minority[0])
+                      minority[0])
 )
 
 # Convert to numeric
@@ -70,6 +70,7 @@ columns = [
     "Democrats Approving", "Independents Approving",
     "Republicans Approving"
 ]
+
 
 def normalize_header(value):
     value = str(value).strip().lower().replace("�", "")
@@ -132,7 +133,8 @@ for _, row in approval.iterrows():
 
 
 approval = pd.DataFrame(result, columns=columns)
-approval["Start Date"] = pd.to_datetime(approval["Start Date"], format="%m/%d/%y")
+approval["Start Date"] = pd.to_datetime(approval["Start Date"],
+                                        format="%m/%d/%y")
 approval["End Date"] = pd.to_datetime(approval["End Date"], format="%m/%d/%y")
 
 approval["Start Date"] = approval["Start Date"].where(
@@ -187,7 +189,8 @@ has_party = approval[party_cols].notna().any(axis=1)
 approval = approval[has_approval & has_party].copy()
 approval.to_csv(script_dir / "Cleaned_Approval_Rating.csv", index=False)
 
-orders["signing_date"] = pd.to_datetime(orders["signing_date"], format="%m/%d/%y", errors="coerce")
+orders["signing_date"] = pd.to_datetime(orders["signing_date"],
+                                        format="%m/%d/%y", errors="coerce")
 orders["signing_date"] = orders["signing_date"].where(
     orders["signing_date"].dt.year <= 2026,
     orders["signing_date"] - pd.DateOffset(years=100)
