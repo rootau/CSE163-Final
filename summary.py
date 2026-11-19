@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
+import visualizations as viz
 
 def get_sum_quan(pd: pd.DataFrame, col: str) -> pd.Series:
     """
@@ -62,6 +63,10 @@ def main():
     approval = pd.read_csv(approval_path, parse_dates=["Start Date", 
                                                        "End Date"])
     orders = pd.read_csv(orders_path, parse_dates=["signing_date"])
+    congress = viz.make_congress(senate, house)
+    orders_vs_congress = viz.make_ordersvscongress(orders, congress)
+    president_orders_vs_approval = viz.make_ordersvsapprovalavg(orders, approval)
+    monthly_orders_vs_approval = viz.make_ordersvsapprovalmonthly(orders, approval)
 
     # Gets all summaries of columns with quantitive data. 
 
