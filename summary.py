@@ -1,9 +1,7 @@
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 from pathlib import Path
 import visualizations as viz
+
 
 def get_sum_quan(pd: pd.DataFrame, col: str) -> pd.Series:
     """
@@ -21,6 +19,7 @@ def get_unique_values(pd: pd.DataFrame, col: str) -> pd.Series:
 
     return pd[col].value_counts(ascending=False)
 
+
 def get_monthyear(pd: pd.DataFrame, time: str) -> pd.Series:
     """
     Gets the number of values in a month of year
@@ -30,6 +29,7 @@ def get_monthyear(pd: pd.DataFrame, time: str) -> pd.Series:
     return months.groupby("Month").size().reset_index(
         name="Count").sort_values(by="Month", ascending=False)
 
+
 def get_calendar_months(pd: pd.DataFrame, time: str) -> pd.Series:
     """
     Gets the number of values in a month aggregated through all years
@@ -38,6 +38,7 @@ def get_calendar_months(pd: pd.DataFrame, time: str) -> pd.Series:
     months["Month"] = pd[time].dt.month_name()
     return months.groupby("Month").size().reset_index(
         name="Count").sort_values(by="Month", ascending=False)
+
 
 def main():
 
