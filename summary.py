@@ -36,6 +36,11 @@ def main():
     # Approval Rating Summaries
     print(get_unique_values(approval_path, "President"))
     print(get_sum_quan(approval_path, "Approving"))
+    print(get_sum_quan(approval_path, "Disapproving"))
+    print(get_sum_quan(approval_path, "Unsure/NoData"))
+    print(get_sum_quan(approval_path, "Republicans Approving"))
+    print(get_sum_quan(approval_path, "Democrats Approving"))
+    print(get_sum_quan(approval_path, "Independents Approving"))
 
     # House Summaries 
     # print(get_sum_quan(house_path, "Democrats"))
