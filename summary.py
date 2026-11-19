@@ -4,13 +4,19 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 
-def getSumQuan(pd: pd.dataframe, col: String):
+def get_sum_quan(pd: pd.dataframe, col: String):
     # Gets the summary of any quantitative values.
 
     return pd[col].describe()
 
 
+def get_unique_values(pd: pd.dataframe, col: String):
+
+    return pd[col].value_counts(ascending=True)
+
+
 def main():
+
     # Points directly to the folder where THIS .py script is saved
     # script_dir = Path(__file__).resolve().parent
     # senate_path = script_dir / "Cleaned_Senate.csv"
@@ -24,7 +30,17 @@ def main():
     orders_path = pd.read_csv("Cleaned_Executive_Orders.csv")
 
     # Gets all summaries of columns with quantitive data. 
-    print(getSumQuan(house_path, "Democrats"))
-    print(getSumQuan(house_path, "Republicans"))
+
+    # Executive Order summary
+    
+    # Approval Rating Summaries
+
+    # House Summaries 
+    print(get_sum_quan(house_path, "Democrats"))
+    print(get_sum_quan(house_path, "Republicans"))
+    print(get_unique_values(house_path ,"Majority"))
+    
+
+    # Senate Summaries
 if __name__ == "__main__":
     main()
