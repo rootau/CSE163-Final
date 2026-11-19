@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-import visualizations as viz
+# import visualizations as viz
 
 
 def get_sum_quan(pd: pd.DataFrame, col: str) -> pd.Series:
@@ -61,20 +61,22 @@ def main():
     orders_path = script_dir / "Cleaned_Executive_Orders.csv"
     senate = pd.read_csv(senate_path, parse_dates=["Start Date", "End Date"])
     house = pd.read_csv(house_path, parse_dates=["Start Date", "End Date"])
-    approval = pd.read_csv(approval_path, parse_dates=["Start Date", 
+    approval = pd.read_csv(approval_path, parse_dates=["Start Date",
                                                        "End Date"])
     orders = pd.read_csv(orders_path, parse_dates=["signing_date"])
-    congress = viz.make_congress(senate, house)
-    orders_vs_congress = viz.make_ordersvscongress(orders, congress)
-    president_orders_vs_approval = viz.make_ordersvsapprovalavg(orders, approval)
-    monthly_orders_vs_approval = viz.make_ordersvsapprovalmonthly(orders, approval)
+    # congress = viz.make_congress(senate, house)
+    # orders_vs_congress = viz.make_ordersvscongress(orders, congress)
+    # president_orders_vs_approval = viz.make_ordersvsapprovalavg(orders,
+    #                                                             approval)
+    # monthly_orders_vs_approval = viz.make_ordersvsapprovalmonthly(orders,
+    #                                                               approval)
 
-    # Gets all summaries of columns with quantitive data. 
+    # Gets all summaries of columns with quantitive data.
 
     # Executive Order summary
     print(get_monthyear(orders, "signing_date"))
     print(get_calendar_months(orders, "signing_date"))
-    
+
     # Approval Rating Summaries
     print(get_monthyear(approval, "End Date"))
     print(get_calendar_months(approval, "End Date"))
@@ -86,16 +88,17 @@ def main():
     print(get_sum_quan(approval, "Democrats Approving"))
     print(get_sum_quan(approval, "Independents Approving"))
 
-    # House Summaries 
+    # House Summaries
     print(get_sum_quan(house, "Democrats"))
     print(get_sum_quan(house, "Republicans"))
-    print(get_unique_values(house ,"Majority"))
-    
+    print(get_unique_values(house, "Majority"))
 
     # Senate Summaries
     print(get_sum_quan(senate, "Democrats"))
     print(get_sum_quan(senate, "Republicans"))
     print(get_sum_quan(senate, "Other"))
     print(get_sum_quan(senate, "Vacant"))
+
+
 if __name__ == "__main__":
     main()
