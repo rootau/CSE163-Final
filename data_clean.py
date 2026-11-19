@@ -36,7 +36,7 @@ senate[["Democrats", "Republicans"]] = (
     senate[["Democrats", "Republicans"]].apply(pd.to_numeric)
 )
 senate.to_csv(script_dir / "Cleaned_Senate.csv", index=False)
-#print(senate.head())
+# print(senate.head())
 
 
 house[["Number", "Year Range"]] = house["Congress (Years)"].str.extract(
@@ -60,7 +60,7 @@ house["Majority"] = np.where(
 )
 house = house.dropna()
 house.to_csv(script_dir / "Cleaned_House.csv", index=False)
-#print(house.head())
+# print(house.head())
 
 
 columns = [
@@ -188,7 +188,7 @@ has_party = approval[party_cols].notna().any(axis=1)
 # Keep rows where both types of data are available
 approval = approval[has_approval & has_party].copy()
 approval.to_csv(script_dir / "Cleaned_Approval_Rating.csv", index=False)
-#print(approval.head())
+# print(approval.head())
 
 orders["signing_date"] = pd.to_datetime(orders["signing_date"],
                                         format="%m/%d/%y", errors="coerce")
@@ -197,4 +197,4 @@ orders["signing_date"] = orders["signing_date"].where(
     orders["signing_date"] - pd.DateOffset(years=100)
 )
 orders.to_csv(script_dir / "Cleaned_Executive_Orders.csv", index=False)
-#print(orders.head())
+# print(orders.head())
