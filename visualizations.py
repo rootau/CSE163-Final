@@ -11,10 +11,8 @@ def make_congress(senate: pd.DataFrame, house: pd.DataFrame) -> pd.DataFrame:
     """
     # Merge the two dataframes on the 'Start Date' and 'End Date' columns
     congress = pd.merge(
-        senate[['Start Date', 'End Date', 'Democrats', 'Republicans',
-                'Party']],
-        house[['Start Date', 'End Date', 'Democrats', 'Republicans',
-               'Majority']],
+        senate[['Start Date', 'End Date', 'Democrats', 'Republicans', 'Party']],
+        house[['Number', 'Start Date', 'End Date', 'Democrats', 'Republicans', 'Majority']],
         on=['Start Date', 'End Date'],
         suffixes=('_Senate', '_House')
     )
@@ -121,6 +119,41 @@ def make_ordersvsapprovalmonthly(orders: pd.DataFrame,
     orders_vs_approval["Orders"] = counts
     return orders_vs_approval
 
+def make_orderscongressgraph(orders_vs_congress: pd.DataFrame) -> plt.figure:
+    """
+    Creates a bar graph of the number of executive orders signed during each Congress
+    """
+    sns.set_theme()
+    fig, ax = plt.subplots(2, 1,figsize=(12, 6))
+    sns.barplot(x="Number", y="Orders", hue="Senate Democrats", data=orders_vs_congress, ax=ax[0])
+    sns.barplot(x="Number", y="Orders", hue="House Democrats", data=orders_vs_congress, ax=ax[1])
+    return fig
+
+def make_orderspresapprovalgraph(orders_vs_approval: pd.DataFrame) -> plt.figure:
+    """
+    Creates a bar graph of the number of executive orders signed during each president's term
+    """
+    sns.set_theme()
+    fig, ax = plt.subplots(2, 1, figsize=(12, 6))
+    sns.barplot(x="President", y="Orders", hue="Average Approval", data=orders_vs_approval, ax=ax[0])
+    sns.barplot(x="President", y="Orders", hue="Average Approval", data=orders_vs_approval, ax=ax[1])
+    ax1 = ax[1].twinx()
+    sns.scatterplot(x="President", y="Average Approval", data=orders_vs_approval, ax=ax1)
+    return fig
+
+def make_ordersapprovalmonthlygraph(orders_vs_approval: pd.DataFrame) -> plt.figure:
+    """
+    Creates a bar graph of the number of executive orders signed during each month
+    """
+    sns.set_theme()
+    fig, ax = plt.subplots(2, 1, figsize=(12, 6))
+    orders_vs_approval["Year-Month"] = orders_vs_approval["Year-Month"].astype(str)
+    sns.barplot(x="Year-Month", y="Orders", data=orders_vs_approval, ax=ax[0])
+    sns.barplot(x="Year-Month", y="Orders", data=orders_vs_approval, ax=ax[1])
+    ax1 = ax[1].twinx()
+    sns.lineplot(x="Year-Month", y="Average Approval", data=orders_vs_approval, ax=ax1)
+    return fig
+    
 
 def main():
     # Points directly to the folder where THIS .py script is saved
@@ -138,11 +171,18 @@ def main():
     congress = make_congress(senate, house)
 
     orders_vs_congress = make_ordersvscongress(orders, congress)
-
     president_orders_vs_approval = make_ordersvsapprovalavg(orders, approval)
-
     monthly_orders_vs_approval = make_ordersvsapprovalmonthly(orders, approval)
 
+    orders_congress_graph = make_orderscongressgraph(orders_vs_congress)
+    orders_congress_graph.savefig(script_dir / "orders_congress_graph.png")
+
+    orders_pres_approval_graph = make_orderspresapprovalgraph(president_orders_vs_approval)
+    orders_pres_approval_graph.savefig(script_dir / "orders_pres_approval_graph.png")
+
+    orders_monthly_approval_graph = make_ordersapprovalmonthlygraph(monthly_orders_vs_approval)
+    orders_monthly_approval_graph.savefig(script_dir / "orders_monthly_approval_graph.png")
+    
 
 if __name__ == "__main__":
     main()
