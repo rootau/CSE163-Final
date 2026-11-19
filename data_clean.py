@@ -10,7 +10,7 @@ house_path = script_dir / "House.csv"
 orders_path = script_dir / "Executive_Orders.csv"
 approval_path = script_dir / "Approval_Rating.csv"
 
-senate = pd.read_csv(senate_path, encoding="latin1")
+senate = pd.read_csv(senate_path, encoding="latin1", skiprows=range(1, 147))
 house = pd.read_csv(house_path, encoding="latin1", skiprows=158)
 orders = pd.read_csv(orders_path, encoding="latin1")
 approval = pd.read_csv(approval_path, encoding="latin1", header=None,
