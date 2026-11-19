@@ -158,7 +158,7 @@ def make_ordersapprovalmonthlygraph(orders_vs_approval: pd.DataFrame) -> plt.fig
     sns.set_theme()
     fig, ax = plt.subplots(2, 1, figsize=(12, 8))
     orders_vs_approval["Year-Month"] = orders_vs_approval["Year-Month"].astype(str)
-    sns.barplot(x="Year-Month", y="Orders", data=orders_vs_approval, ax=ax[0])
+    sns.lineplot(x="Year-Month", y="Orders", data=orders_vs_approval, ax=ax[0])
     sns.barplot(x="Year-Month", y="Orders", data=orders_vs_approval, ax=ax[1])
     ax1 = ax[1].twinx()
     sns.lineplot(x="Year-Month", y="Average Approval", data=orders_vs_approval, ax=ax1)
