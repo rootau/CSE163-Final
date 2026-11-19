@@ -75,6 +75,8 @@ def main():
     print(get_calendar_months(orders, "signing_date"))
     
     # Approval Rating Summaries
+    print(get_monthyear(approval, "End Date"))
+    print(get_calendar_months(approval, "End Date"))
     print(get_unique_values(approval, "President"))
     print(get_sum_quan(approval, "Approving"))
     print(get_sum_quan(approval, "Disapproving"))
