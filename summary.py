@@ -5,12 +5,18 @@ import seaborn as sns
 from pathlib import Path
 
 def get_sum_quan(pd: pd.dataframe, col: Str) -> pd.DataFrame:
-    # Gets the summary of any quantitative values.
+    """
+    Gets the summary of any quantitative values.
+    """
 
     return pd[col].describe()
 
 
 def get_unique_values(pd: pd.dataframe, col: String) -> pd.DataFrame:
+    """
+    Gets the summary of any catigorical values by getting the count
+    of unique values.
+    """
 
     return pd[col].value_counts(ascending=False)
 
