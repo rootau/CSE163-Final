@@ -43,9 +43,9 @@ def main():
     print(get_sum_quan(approval_path, "Independents Approving"))
 
     # House Summaries 
-    # print(get_sum_quan(house_path, "Democrats"))
-    # print(get_sum_quan(house_path, "Republicans"))
-    # print(get_unique_values(house_path ,"Majority"))
+    print(get_sum_quan(house_path, "Democrats"))
+    print(get_sum_quan(house_path, "Republicans"))
+    print(get_unique_values(house_path ,"Majority"))
     
 
     # Senate Summaries
