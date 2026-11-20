@@ -2,6 +2,7 @@ import pandas as pd
 import re
 import numpy as np
 from pathlib import Path
+# print statements are used to present tests. 
 
 # Points directly to the folder where THIS .py script is saved
 script_dir = Path(__file__).resolve().parent
